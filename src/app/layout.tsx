@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from '@/app/components/Navbar';
+import AppWalletProvider from "./components/AppWalletProvider";
+import { cn } from "@/utils/helper";
+import { UserProvider } from "@/context/UserContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,8 +19,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className={cn("h-full w-3/4 m-auto", inter.className)} data-theme="cupcake">
+      <body className="flex flex-col h-full">
+        <AppWalletProvider>
+          <UserProvider>
+            <Navbar />
+            <main className="flex-1">
+              {children}
+            </main>
+          </UserProvider>
+        </AppWalletProvider>
+      </body>
     </html>
   );
 }
