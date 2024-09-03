@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { useWallet } from '@solana/wallet-adapter-react';
 import axios from 'axios';
 import { User } from '@prisma/client';
+import { toast } from 'react-toastify';
 
 interface UserContextType {
     user: User | null;
@@ -13,6 +14,16 @@ interface UserContextType {
     persistedMasterKey: string | null
     setPersistedMasterKey: (key: string) => void;
 
+}
+
+function downloadMasterKey(masterKey: string) {
+    const element = document.createElement('a');
+    const file = new Blob([masterKey], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'masterkey.txt';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -64,7 +75,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             if (response.data) {
                 setUser(response.data.data);
-                alert(`This is your master key, keep it save if lost you will not be able to recover again.${response?.data?.data?.key}`)
+                // alert(`This is your master key, keep it save if lost you will not be able to recover again.\n${response?.data?.data?.masterkey}`)
+                if (response?.data?.data?.masterkey) {
+                    await navigator.clipboard.writeText(response?.data?.data?.masterkey);
+                    toast.success('Master key copied to clipboard and downloaded');
+                    downloadMasterKey(response?.data?.data?.masterkey);
+                }
             } else {
                 console.warn("API response does not contain data.");
             }
