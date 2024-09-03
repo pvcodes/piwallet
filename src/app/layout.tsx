@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("h-full w-3/4 m-auto", inter.className)} data-theme="cupcake">
+    <html lang="en" className={cn("h-full w-full m-auto md:w-3/4 lg:w-3/4", inter.className)} data-theme="cupcake">
       <body className="flex flex-col h-full">
         <AppWalletProvider>
           <UserProvider>
