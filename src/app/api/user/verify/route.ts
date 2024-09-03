@@ -28,18 +28,14 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const credentials = await retrieveCredentialAll(user.id);
-
-		// checking if masterkey is valid
-		if (!credentials.length) {
-			return NextResponse.json(
-				{ success: true, data: credentials },
-				{ status: 200 }
-			);
-		}
-		const credential = credentials[0];
+		// validating masterKey
 		try {
-			decrypt(credential.username, masterKey);
+			const decryptedWalletAddress = decrypt(
+				user.eWalletAddress,
+				masterKey
+			);
+			if (decryptedWalletAddress !== user.walletAddress)
+				throw "Invalid master key";
 		} catch (error) {
 			console.log(error);
 			return NextResponse.json(
@@ -47,6 +43,8 @@ export async function POST(req: NextRequest) {
 				{ status: 400 }
 			);
 		}
+
+		const credentials = await retrieveCredentialAll(user.id);
 
 		return NextResponse.json(
 			{

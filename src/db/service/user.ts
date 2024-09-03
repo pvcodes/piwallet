@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import prisma from "@/db";
-import { deriveMasterKey, generateSalt } from "@/utils/encryption"; // Assuming your encryption functions are in a file named crypto.ts
+import { deriveMasterKey, encrypt, generateSalt } from "@/utils/encryption"; // Assuming your encryption functions are in a file named crypto.ts
 
 // Create a new user with wallet address
 async function findOrAddUser(walletAddress: string): Promise<User> {
@@ -31,6 +31,7 @@ async function updateUser(
 		const salt = generateSalt(16);
 		key = deriveMasterKey(dataToUpdate?.passphrase, salt);
 		data.salt = salt;
+		data.eWalletAddress = encrypt(walletAddress, key.toString("hex"));
 	}
 	const updatedUser = await prisma.user.update({
 		where: { walletAddress },

@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(uuid())
-  walletAddress String       @unique
-  createdAt     DateTime     @default(now())
-  credentials   Credential[]
-  salt          String?      @unique
+  id             String       @id @default(uuid())
+  walletAddress  String       @unique
+  createdAt      DateTime     @default(now())
+  credentials    Credential[]
+  salt           String?      @unique
+  eWalletAddress String?
 }
 
 model Credential {
