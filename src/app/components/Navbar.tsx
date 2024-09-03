@@ -27,8 +27,8 @@ const Navbar = () => {
                 <div className="dropdown sm:hidden">
                     <button tabIndex={0} role="button" className="btn btn-ghost"><RxHamburgerMenu className='w-max' /></button>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                        <li><Link href={'/about'}>About</Link></li>
-                        <li><Link href={'/contribute'}>Contribute</Link></li>
+                        <li><Link href={'/'}>About</Link></li>
+                        <li><Link href={'https://github.com/pvcodes/piwallet'} target='_blank'>Contribute</Link></li>
                     </ul>
                 </div>
 
@@ -43,8 +43,8 @@ const Navbar = () => {
                         :
                         <div className="navbar-center hidden lg:flex">
                             <ul className="menu menu-horizontal px-1">
-                                <li><Link href={'/about'}>About</Link></li>
-                                <li><Link href={'/contribute'}>Contribute</Link></li>
+                                <li><Link href={'/'}>About</Link></li>
+                                <li><Link href={'https://github.com/pvcodes/piwallet'} target='_blank'>Contribute</Link></li>
                             </ul>
                         </div>
 
