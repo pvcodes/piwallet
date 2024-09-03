@@ -1,12 +1,8 @@
 import { useUserContext } from '@/context/UserContext'
-import useUser from '@/hook/useUser'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
 const AddMasterKey = () => {
-    const { publicKey, updateUser } = useUserContext()
-    const router = useRouter()
+    const { updateUser } = useUserContext()
     const [passphrase, setPassphrase] = useState('')
 
     const handleAddPassphrase = (e) => {

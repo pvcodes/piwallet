@@ -9,7 +9,10 @@ interface UserContextType {
     loading: boolean;
     publicKey: string | null;
     wallet: any;
-    updateUser: Function
+    updateUser: Function;
+    persistedMasterKey: string | null
+    setPersistedMasterKey: (key: string) => void;
+
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -19,6 +22,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const isFetching = useRef(false); // Ref to track fetch status
+    const [persistedMasterKey, setPersistedMasterKeyState] = useState<string | null>(null); // Add state for masterKey
+
 
     useEffect(() => {
         const findOrAddUser = async () => {
@@ -41,6 +46,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             } else {
                 setUser(null);
+                setPersistedMasterKeyState(null)
             }
         };
 
@@ -69,8 +75,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const setPersistedMasterKey = (key: string) => {
+        setPersistedMasterKeyState(key);
+    };
     return (
-        <UserContext.Provider value={{ user, loading, publicKey: publicKey?.toString() || null, wallet, updateUser }}>
+        <UserContext.Provider value={{ user, loading, publicKey: publicKey?.toString() || null, wallet, updateUser, persistedMasterKey, setPersistedMasterKey }}>
             {children}
         </UserContext.Provider>
     );

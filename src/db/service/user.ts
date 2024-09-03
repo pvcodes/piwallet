@@ -6,6 +6,7 @@ import { deriveMasterKey, generateSalt } from "@/utils/encryption"; // Assuming 
 async function findOrAddUser(walletAddress: string): Promise<User> {
 	// Check if the user already exists
 	let user = await findUserByWalletAddress(walletAddress);
+	console.log(2342, user, "user");
 	if (user) {
 		return user;
 	}

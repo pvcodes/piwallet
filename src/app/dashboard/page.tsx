@@ -59,7 +59,7 @@ export default function DashboardPage({
                     <div className="flex lg:hidden items-center justify-center mb-4">
                         <Bars />
                     </div>
-                    <div className="shadow-lg rounded-lg p-6 h-full w-full">
+                    <div className="flex flex-col items-center shadow-lg rounded-lg p-6 h-full w-full">
                         <ActiveManager />
                     </div>
                 </div>

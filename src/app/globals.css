@@ -3,6 +3,25 @@
 @tailwind utilities;
 
 .blur-background {
-    background-color: rgba(0, 0, 0, 0.5); /* Adjust color and opacity */
-    backdrop-filter: blur(8px); /* Customize blur intensity */
-}  
+	background-color: rgba(0, 0, 0, 0.5); /* Adjust color and opacity */
+	backdrop-filter: blur(8px); /* Customize blur intensity */
+}
+/* .Toastify__toast {
+	@apply bg-theme-card-background p-4 shadow-lg ring-1 ring-gray-200;
+}
+
+.Toastify__toast-body {
+	@apply items-start text-theme-typography-paragraph;
+}
+
+.Toastify__progress-bar {
+	@apply opacity-100;
+}
+
+.Toastify__progress-bar--success {
+	@apply bg-theme-accent;
+}
+
+.Toastify__progress-bar--error {
+	@apply bg-red-500;
+} */

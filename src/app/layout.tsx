@@ -5,7 +5,7 @@ import Navbar from '@/app/components/Navbar';
 import AppWalletProvider from "./components/AppWalletProvider";
 import { cn } from "@/utils/helper";
 import { UserProvider } from "@/context/UserContext";
-
+import 'react-toastify/dist/ReactToastify.css'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
