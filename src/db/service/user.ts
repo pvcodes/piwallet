@@ -1,17 +1,13 @@
 import { User } from "@prisma/client";
 import prisma from "@/db";
-import { deriveMasterKey, encrypt, generateSalt } from "@/utils/encryption"; // Assuming your encryption functions are in a file named crypto.ts
+import { deriveMasterKey, encrypt, generateSalt } from "@/utils/encryption";
 
-// Create a new user with wallet address
 async function findOrAddUser(walletAddress: string): Promise<User> {
-	// Check if the user already exists
-	let user = await findUserByWalletAddress(walletAddress);
-	console.log(2342, user, "user");
+	let user = await prisma.user.findUnique({ where: { walletAddress } });
 	if (user) {
 		return user;
 	}
 
-	// Create a new user without passphrase
 	user = await prisma.user.create({
 		data: {
 			walletAddress,
@@ -21,70 +17,54 @@ async function findOrAddUser(walletAddress: string): Promise<User> {
 	return user;
 }
 
-async function updateUser(
+async function generateMasterKey(
+	id: string,
 	walletAddress: string,
-	dataToUpdate: any
-): Promise<User | null> {
+	passphrase: string
+): Promise<{ masterkey: string; salt: string } | null> {
 	const data: any = {};
-	let key;
-	if (dataToUpdate?.passphrase) {
+	let masterkey = "";
+	if (passphrase) {
 		const salt = generateSalt(16);
-		key = deriveMasterKey(dataToUpdate?.passphrase, salt);
+		masterkey = deriveMasterKey(passphrase, salt).toString("hex");
 		data.salt = salt;
-		data.eWalletAddress = encrypt(walletAddress, key.toString("hex"));
+		data.eWalletAddress = encrypt(walletAddress, masterkey);
 	}
-	const updatedUser = await prisma.user.update({
-		where: { walletAddress },
+	const user = await prisma.user.update({
+		where: { walletAddress, id },
 		data,
+		select: { salt: true },
 	});
 
 	return {
-		...updatedUser,
-		masterkey: key.toString("hex"),
+		salt: user.salt!, // if it came here, salt has been generated
+		masterkey,
 	};
 }
 
-// ... existing code ...
-
-// Find a user by wallet address
 async function findUserByWalletAddress(
+	id: string,
 	walletAddress: string
 ): Promise<User | null> {
 	return prisma.user.findUnique({
-		where: { walletAddress },
+		where: { id, walletAddress },
 	});
 }
 
-// Verify user's passphrase by deriving the key and comparing with stored data
-async function verifyUser(
-	walletAddress: string,
-	passphrase: string
-): Promise<boolean> {
-	const user = await findUserByWalletAddress(walletAddress);
-	if (!user) return false;
-
-	try {
-		const key = deriveMasterKey(passphrase, user.salt);
-		// If the key derivation does not throw an error, the passphrase is correct
-		return !!key;
-	} catch (error) {
-		return false;
-	}
-}
-
-// Delete a user by wallet address
 async function deleteUserByWalletAddress(
+	id: string,
 	walletAddress: string
 ): Promise<User | null> {
 	return prisma.user.delete({
-		where: { walletAddress },
+		where: { id, walletAddress },
 	});
 }
 
-export {
+const userService = {
 	findOrAddUser,
-	updateUser,
+	generateMasterKey,
 	findUserByWalletAddress,
-	verifyUser,
 	deleteUserByWalletAddress,
 };
+
+export default userService;

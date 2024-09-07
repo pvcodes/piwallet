@@ -12,7 +12,7 @@ const Homepage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowDisclaimer(false);
-    }, 5000);
+    }, 50);
     return () => clearTimeout(timer);
   }, []);
 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useReducer, FormEvent } from 'react'
 import { FaEdit, FaTrash } from 'react-icons/fa'
 import AddMasterKey from './AddMasterKey';
-import { useUserContext } from '@/context/UserContext';
+import { useAuthContext } from '@/context/AuthContext';
 import axios from 'axios';
 import { decrypt, encrypt } from '@/utils/encryption';
 import { toast, ToastContainer } from 'react-toastify';
@@ -66,7 +66,7 @@ const reducer = (state: State, action: Action): State => {
 };
 
 const PasswordManager: React.FC = () => {
-  const { user, publicKey, persistedMasterKey, setPersistedMasterKey } = useUserContext();
+  const { walletAddress, persistedMasterKey, setPersistedMasterKey, hasMasterKey } = useAuthContext();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -77,18 +77,16 @@ const PasswordManager: React.FC = () => {
   }, [persistedMasterKey]);
 
   const handleViewPasswords = useCallback(async (e: FormEvent | null = null, masterKey: string | null = persistedMasterKey) => {
-    console.log('hvk')
     if (e) e.preventDefault();
     dispatch({ type: 'SET_IS_LOADING', payload: true });
     try {
-      console.log(masterKey, 'masterKet')
       if (!masterKey) throw 'Master key is not defined'
 
       const response = await axios.post('/api/user/verify', {
         masterKey: persistedMasterKey ?? masterKey,
-        walletAddress: user?.walletAddress
+        walletAddress
       });
-      const decryptedCredentials = response.data.data.map(({ id, url, username, password }: Credential) => ({
+      const decryptedCredentials = response.data.data.credentials.map(({ id, url, username, password }: Credential) => ({
         id,
         url: decrypt(url, masterKey),
         username: decrypt(username, masterKey),
@@ -102,11 +100,11 @@ const PasswordManager: React.FC = () => {
       toast.success('Passwords unlocked successfully!');
     } catch (error) {
       console.error('Error verifying master key:', error);
-      toast.error('Failed to verify master key.');
+      toast.error(error.response.data.error);
     } finally {
       dispatch({ type: 'SET_IS_LOADING', payload: false });
     }
-  }, [persistedMasterKey, user?.walletAddress, state.hasMasterKeyToPersist, setPersistedMasterKey]);
+  }, [persistedMasterKey, walletAddress, state.hasMasterKeyToPersist]);
 
   const handleAddCredential = useCallback(async (e: FormEvent) => {
     e.preventDefault();
@@ -117,7 +115,7 @@ const PasswordManager: React.FC = () => {
     };
     try {
       const response = await axios.post('/api/credential', {
-        walletAddress: publicKey,
+        walletAddress: walletAddress,
         credential: encryptedCredential
       });
       dispatch({ type: 'SET_CREDENTIALS', payload: [...state.credentials, { id: response.data.data.id, ...state.credential }] });
@@ -127,7 +125,7 @@ const PasswordManager: React.FC = () => {
       console.error('Error saving credential:', error);
       toast.error('Failed to add credential.');
     }
-  }, [state.credential, state.masterKey, publicKey, state.credentials]);
+  }, [state.credential, state.masterKey, walletAddress, state.credentials]);
 
   const handleUpdateCredential = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,7 +148,7 @@ const PasswordManager: React.FC = () => {
 
     try {
       await axios.put('/api/credential', {
-        walletAddress: publicKey,
+        walletAddress: walletAddress,
         id: state.selectedCredential?.id,
         credential: encryptedCredential
       });
@@ -161,18 +159,18 @@ const PasswordManager: React.FC = () => {
       console.error('Error updating credential:', error);
       toast.error('Failed to update credential.');
     }
-  }, [state.selectedCredential, state.masterKey, publicKey]);
+  }, [state.selectedCredential, state.masterKey, walletAddress]);
 
   const handleDeleteCredential = useCallback(async (id: string) => {
     try {
-      await axios.delete('/api/credential', { params: { id, walletAddress: publicKey } });
+      await axios.delete('/api/credential', { params: { id, walletAddress: walletAddress } });
       dispatch({ type: 'SET_CREDENTIALS', payload: state.credentials.filter(cred => cred.id !== id) });
       toast.success('Credential deleted successfully!');
     } catch (error) {
       console.error('Error deleting credential:', error);
       toast.error('Failed to delete credential.');
     }
-  }, [publicKey, state.credentials]);
+  }, [walletAddress, state.credentials]);
 
   const memoizedCredentials = useMemo(() => state.credentials.map(credential => (
     <div key={credential.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-300 rounded-md">
@@ -202,8 +200,8 @@ const PasswordManager: React.FC = () => {
     <div className="p-4 w-full rounded-xl space-y-4 lg:w-4/5">
       <ToastContainer position="bottom-left" />
 
-      {!user?.salt && <AddMasterKey />}
-      {user?.salt && !state.isUnlocked && !state.isLoading && (
+      {!hasMasterKey && <AddMasterKey />}
+      {hasMasterKey && !state.isUnlocked && !state.isLoading && (
         <>
           <div className='flex justify-end items-end'>
             <h4 className='pr-2 text-sm'>Persist the master key for this session</h4>

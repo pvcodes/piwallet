@@ -7,14 +7,15 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import Bars from './ui/Bars'
 import next from 'next'
 import { useRouter } from 'next/navigation'
+import { useAuthContext } from '@/context/AuthContext'
 
 
 
 const Navbar = () => {
 
-    const { connection } = useConnection();
-    const { publicKey } = useWallet();
-
+    const { wallet } = useAuthContext()
+    const router = useRouter()
+    if (wallet) router.push('/dashboard')
 
     return (
         <>
@@ -34,7 +35,7 @@ const Navbar = () => {
                     <Link className="btn btn-ghost text-xl" href={'/'}>PiWallet</Link>
                 </div>
                 {
-                    (connection && publicKey) ?
+                    wallet ?
                         <div className="navbar-center hidden lg:flex">
                             <Bars />
                         </div>

@@ -1,105 +1,55 @@
-import {
-	deleteCredential,
-	storeCredential,
-	updateCredential,
-} from "@/db/service/credential";
-import { findOrAddUser, findUserByWalletAddress } from "@/db/service/user";
-import { NextApiRequest } from "next";
-import { NextRequest, NextResponse } from "next/server";
+import credentialService from "@/db/service/credential";
+import userService from "@/db/service/user";
+import { ResponseObject } from "@/utils/helper";
+import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
 	try {
+		const uid = req.headers.get("x-uid");
 		const { walletAddress, credential } = await req.json();
 		if (!walletAddress) {
-			return NextResponse.json(
-				{
-					success: false,
-					error: "Missing walletAddress",
-				},
-				{ status: 400 }
-			);
+			return ResponseObject(false, "Missing walletAddress", 400);
 		}
-		const user = await findUserByWalletAddress(walletAddress);
-
-		console.log(234, user);
-
-		// validation for credentials
-		const cred = await storeCredential(user?.id, credential);
-		console.log(23424, cred, "cred");
-		return NextResponse.json(
-			{ success: true, data: cred },
-			{ status: 200 }
-		);
+		credential.userId = uid;
+		const cred = await credentialService.storeCredential(credential);
+		return ResponseObject(true, { credential: cred });
 	} catch (error) {
-		console.log(error);
-		return NextResponse.json(
-			{ success: false, error: "Error adding user" },
-			{ status: 500 }
-		);
+		return ResponseObject(false, (error as Error).message);
 	}
 }
 
 export async function PUT(req: NextRequest) {
 	try {
+		const uid = req.headers.get("x-uid");
 		const { walletAddress, credential, id } = await req.json();
-		if (!walletAddress) {
-			return NextResponse.json(
-				{
-					success: false,
-					error: "Missing walletAddress",
-				},
-				{ status: 400 }
-			);
+		if (!walletAddress || !uid) {
+			return ResponseObject(false, "Missing walletAddress", 400);
 		}
-		const user = await findUserByWalletAddress(walletAddress);
-
-		console.log(234, user);
 
 		// validation for credentials
-		const cred = await updateCredential(id, user?.id, credential);
-		console.log(cred, "credUpadte");
-		return NextResponse.json(
-			{ success: true, data: cred },
-			{ status: 200 }
+		const cred = await credentialService.updateCredential(
+			uid,
+			id,
+			credential
 		);
+		return ResponseObject(true, { credential: cred });
 	} catch (error) {
 		console.log(error);
-		return NextResponse.json(
-			{ success: false, error: "Error adding user" },
-			{ status: 500 }
-		);
+		return ResponseObject(false, (error as Error).message);
 	}
 }
 
 export async function DELETE(req: NextRequest) {
 	try {
-		const walletAddress = req.nextUrl.searchParams.get("walletAddress");
+		const uid = req.headers.get("x-uid");
 		const id = req.nextUrl.searchParams.get("id");
-		console.log(234, walletAddress, id, "delete");
-		if (!walletAddress) {
-			return NextResponse.json(
-				{
-					success: false,
-					error: "Missing walletAddress",
-				},
-				{ status: 400 }
-			);
+		if (!id || !uid) {
+			return ResponseObject(false, "Invalid Request", 400);
 		}
-		const user = await findUserByWalletAddress(walletAddress);
-
-		console.log(234, user);
-
-		// validation for credentials
-		const cred = await deleteCredential(id, user?.id);
-		return NextResponse.json(
-			{ success: true, data: cred },
-			{ status: 200 }
-		);
+		const cred = await credentialService.deleteCredential(uid, id);
+		return ResponseObject(true, { credential: cred });
 	} catch (error) {
 		console.log(error);
-		return NextResponse.json(
-			{ success: false, error: "Error adding user" },
-			{ status: 500 }
-		);
+		return ResponseObject(false, (error as Error).message);
 	}
 }

@@ -1,15 +1,15 @@
-import { useUserContext } from '@/context/UserContext'
+import { useAuthContext } from '@/context/AuthContext'
 import React, { useState } from 'react'
 
 const AddMasterKey = () => {
-    const { updateUser } = useUserContext()
+    const { generateMasterKey } = useAuthContext()
     const [passphrase, setPassphrase] = useState('')
 
     const handleAddPassphrase = (e) => {
         e.preventDefault()
         const addPassphrase = async () => {
             try {
-                await updateUser({ passphrase })
+                await generateMasterKey(passphrase)
             } catch (error) {
                 console.log(error, 'add master key')
             }

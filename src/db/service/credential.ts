@@ -1,18 +1,10 @@
 import prisma from "@/db";
 import { deriveMasterKey, encrypt, decrypt } from "@/utils/encryption"; // Assuming your encryption functions are in a file named crypto.ts
+import { Credential } from "@prisma/client";
 
-async function storeCredential(
-	userId: string,
-	credential: {
-		name: string;
-		url: string;
-		username: string;
-		password: string;
-		notes?: string;
-	}
-) {
+async function storeCredential(credential: Credential) {
 	return await prisma.credential.create({
-		data: { ...credential, userId },
+		data: credential,
 	});
 }
 
@@ -29,17 +21,21 @@ async function retrieveCredentialAll(userId: string) {
 	return prisma.credential.findMany({ where: { userId } });
 }
 
-async function updateCredential(id, userId, credential) {
+async function updateCredential(
+	userId: string,
+	id: string,
+	credential: Credential
+) {
 	return prisma.credential.update({
 		where: {
 			id,
 			userId,
 		},
-		data: { ...credential },
+		data: credential,
 	});
 }
 
-async function deleteCredential(id, userId) {
+async function deleteCredential(userId: string, id: string) {
 	return prisma.credential.delete({
 		where: {
 			id,
@@ -48,10 +44,12 @@ async function deleteCredential(id, userId) {
 	});
 }
 
-export {
+const credentialService = {
 	storeCredential,
 	retrieveCredential,
 	retrieveCredentialAll,
 	updateCredential,
 	deleteCredential,
 };
+
+export default credentialService;

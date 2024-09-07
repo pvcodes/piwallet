@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from '@/app/components/Navbar';
 import AppWalletProvider from "./components/AppWalletProvider";
 import { cn } from "@/utils/helper";
-import { UserProvider } from "@/context/UserContext";
+import { AuthProvider } from "@/context/AuthContext";
 import 'react-toastify/dist/ReactToastify.css'
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,12 +22,12 @@ export default function RootLayout({
     <html lang="en" className={cn("h-full w-full m-auto md:w-3/4 lg:w-3/4", inter.className)} data-theme="cupcake">
       <body className="flex flex-col h-full">
         <AppWalletProvider>
-          <UserProvider>
+          <AuthProvider>
             <Navbar />
             <main className="flex-1">
               {children}
             </main>
-          </UserProvider>
+          </AuthProvider>
         </AppWalletProvider>
       </body>
     </html>

@@ -10,7 +10,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import WalletButton from "../components/ui/WalletButton";
 import useUser from "@/hook/useUser";
 import { FaSpinner } from 'react-icons/fa'; // Import the icon
-import { useUserContext } from "@/context/UserContext";
+import { useAuthContext } from "@/context/AuthContext";
 
 
 export default function DashboardPage({
@@ -20,11 +20,7 @@ export default function DashboardPage({
     params: { slug: string };
     searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-    const { user, loading } = useUserContext();
-    const { connection } = useConnection();
-
-    console.log(connection, 'connection')
-
+    const { walletAddress, loading } = useAuthContext();
     const tab = searchParams?.tab as (keyof typeof DASHBOARD_TAB) | undefined;
     if (!tab) return redirect(`?tab=${DASHBOARD_TAB.PASSWORD}`);
 
@@ -54,7 +50,7 @@ export default function DashboardPage({
                 {/* Add your loading skeleton component here if you have one */}
             </div>
             :
-            user ?
+            walletAddress ?
                 <div className="mt-5 h-full w-full">
                     <div className="flex lg:hidden items-center justify-center mb-4">
                         <Bars />
